@@ -1,135 +1,76 @@
-#define trigPin1 8
-#define echoPin1 9
-#define trigPin2 7
-#define echoPin2 6
-#define trigPin3 12
-#define echoPin3 13
- 
-const byte pwml = 3;
-const byte pwmr = 5;
-const byte pwml2 = 10;
-const byte pwmr2 = 11;
- 
+#define TRIG_PIN_1 8
+#define ECHO_PIN_1 9
+#define TRIG_PIN_2 7
+#define ECHO_PIN_2 6
+#define TRIG_PIN_3 12
+#define ECHO_PIN_3 13
+
+const byte PWML = 3;
+const byte PWMF = 5;
+const byte PWML_B = 10;
+const byte PWMF_B = 11;
+
 long duration;
 int distance;
 long duration2;
 int distance2;
 long duration3;
 int distance3;
- 
+
 void setup() {
   Serial.begin(9600);
  
-  pinMode(trigPin1, OUTPUT);
-  pinMode(echoPin1, INPUT);
+  pinMode(TRIG_PIN_1, OUTPUT);
+  pinMode(ECHO_PIN_1, INPUT);
  
-  pinMode(trigPin2, OUTPUT);
-  pinMode(echoPin2, INPUT);
+  pinMode(TRIG_PIN_2, OUTPUT);
+  pinMode(ECHO_PIN_2, INPUT);
  
-  pinMode(trigPin3, OUTPUT);
-  pinMode(echoPin3, INPUT);
+  pinMode(TRIG_PIN_3, OUTPUT);
+  pinMode(ECHO_PIN_3, INPUT);
  
-  pinMode(pwml2, OUTPUT);
-  pinMode(pwmr2, OUTPUT); //FIX! 
+  pinMode(PWML_B, OUTPUT);
+  pinMode(PWMF_B, OUTPUT);
 }
- 
-int sensor1() {
-  digitalWrite(trigPin1, LOW); 
+
+int get_sensor_reading(int trig_pin, int echo_pin) {
+  // Send trigger pulse
+  digitalWrite(trig_pin, LOW);
   delayMicroseconds(2);
-  digitalWrite(trigPin1, HIGH);
+  digitalWrite(trig_pin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin1, LOW);
-  duration = pulseIn(echoPin1, HIGH);
-  distance = duration * 0.034 / 2; 
+  digitalWrite(trig_pin, LOW);
+  
+  // Measure duration of echo pulse
+  long duration = pulseIn(echo_pin, HIGH);
+  
+  // Calculate distance based on duration
+  int distance = duration * 0.034 / 2; 
   return distance;
 }
- 
- 
-int sensor2() {
-  digitalWrite(trigPin2, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin2, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin2, LOW);
-  duration2 = pulseIn(echoPin2, HIGH);
-  distance2 = duration2 * 0.0343 / 2;
-  return distance2;
-}
- 
-int sensor3() {
-  digitalWrite(trigPin3, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin3, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin3, LOW);
-  duration3 = pulseIn(echoPin3, HIGH);
-  distance3 = duration3 * 0.0343 / 2;
-  return distance3;
-}
- 
+
 void stop_car() {
-  digitalWrite(pwmr, LOW);
-  digitalWrite(pwml2, LOW);
+  digitalWrite(PWMF, LOW);
+  digitalWrite(PWML_B, LOW);
 }
- 
+
 void start_car() {
-  digitalWrite(pwmr, HIGH);
-  digitalWrite(pwml2, HIGH);
-}
- 
-void car_right() {
-  //turn right
-  digitalWrite(pwmr, HIGH); //fowards motor 1 --> pwml2, backwards motor 1 --> pwmr2, backwards motor 2 --> pwml, forward motor 2 --> pwmr
-  digitalWrite(pwml2, LOW);
-}
- 
-void car_left() {
-  //turn left
-  digitalWrite(pwmr, LOW); //fowards motor 1 --> pwml2, backwards motor 1 --> pwmr2, backwards motor 2 --> pwml, forward motor 2 --> pwmr
-  digitalWrite(pwml2, HIGH);
+  digitalWrite(PWMF, HIGH);
+  digitalWrite(PWML_B, HIGH);
 }
 
-void car_back() {
-  digitalWrite(pwml, HIGH);
-  digitalWrite(pwmr2, HIGH);
+void turn_car_right() {
+  // Turn car right
+  digitalWrite(PWMF, HIGH); 
+  digitalWrite(PWML_B, LOW);
 }
- 
-void loop() {
-  int s1 = sensor1();
-  int s2 = sensor2();
-  int s3 = sensor3();
- 
-  Serial.print("Sensor 1: ");
-  Serial.println(sensor1());
-  Serial.print("Sensor 2: ");
-  Serial.println(sensor2());
-  Serial.print("Sensor 3: ");
-  Serial.println(sensor3());
-  delay(100);
 
-  analogWrite(pwmr, 150);
-  analogWrite(pwml2, 150);
- 
-  while (s1 > 60) {
-    if (s1 < 60) {
-      digitalWrite(pwml, HIGH);
-      digitalWrite(pwmr2, HIGH);
-    }
-    if (s2 < s3) {
-      car_right();
-    } 
-    else if (s3 < s2) {
-      car_left();
-    } 
-  }
-
-  /* 
-  while (s2 < 40 && s1 < 40) {
-    car_right();
-  } 
- 
-  while (s3 < 40 && s1 < 40) {
-    car_left();
-  } */
+void turn_car_left() {
+  // Turn car left
+  digitalWrite(PWMF, LOW); 
+  digitalWrite(PWML_B, HIGH);
 }
- 
+
+void back_car_up() {
+  // Back car up
+  digitalWrite(PWML, HIGH);
